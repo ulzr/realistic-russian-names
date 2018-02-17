@@ -1,0 +1,102 @@
+#!/usr/bin/env ruby
+# encoding: UTF-8
+require 'optparse'
+
+class RandomName
+  
+  def initialize(require_s, &impl)
+    @require_s = require_s
+    @impl = impl
+  end
+  
+  def init
+    require @require_s
+    @require_s = nil
+  end
+  
+  def call(*args)
+    @impl.(*args)
+  end
+  
+end
+
+DEFAULT_GENDERS = [:male, :female]
+
+FIRST_NAME = RandomName.new('realistic_russian_first_names') do |gender|
+  realistic_russian_first_names(gender).sample
+end
+
+PATRONYMIC = RandomName.new('realistic_russian_patronymics') do |gender|
+  realistic_russian_patronymics(gender).sample
+end
+
+LAST_NAME = RandomName.new('realistic_russian_last_names') do |gender|
+  realistic_russian_last_names(gender).sample
+end
+
+$count = 1
+$genders = DEFAULT_GENDERS
+$parts_f = [LAST_NAME, FIRST_NAME, PATRONYMIC]
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename __FILE__} [options]"
+  opts.separator ""
+  opts.separator "Prints random russian names. The more popular the name"
+  opts.separator "the more often it will be printed."
+  opts.separator ""
+  opts.separator "The names are printed in the following format (with respect to"
+  opts.separator "excluded parts):"
+  opts.separator ""
+  opts.separator "    <last name> <first name> <patronymic>"
+  opts.separator ""
+  opts.separator "Options:"
+  opts.on "-n", "--number NUM", "Print NUM names. Default is #{$count}." do |count|
+    count = begin
+      Integer(count)
+    rescue
+      abort "error: value for `--number' must be an integer number"
+    end
+    if count < 0 then
+      abort "error: value for `--number' must not be less than zero"
+    end
+    $count = count
+  end
+  opts.on "-m", "--male", "Print only male names." do
+    if not $genders.equal? DEFAULT_GENDERS
+      abort "error: can not use both `--male' and `--female'"
+    end
+    $genders = [:male]
+  end
+  opts.on "-f", "--female", "Print only female names." do
+    if not $genders.equal? DEFAULT_GENDERS
+      abort "error: can not use both `--male' and `--female'"
+    end
+    $genders = [:female]
+  end
+  opts.on "-F", "--no-first", "Do not print first name." do
+    $parts_f.delete FIRST_NAME
+  end
+  opts.on "-P", "--no-patronymic", "Do not print patronymic." do
+    $parts_f.delete PATRONYMIC
+  end
+  opts.on "-L", "--no-last", "Do not print last name." do
+    $parts_f.delete LAST_NAME
+  end
+  opts.on "-s", "--seed SEED", "Set random number generator seed." do |seed|
+    seed = begin
+      Integer(seed)
+    rescue
+      abort "error: value for `--seed' must be an integer number"
+    end
+    srand(seed)
+  end
+  opts.on "-h", "--help", "Show this message and exit." do
+    puts opts
+    exit
+  end
+end.parse!
+
+$parts_f.each(&:init)
+$count.times do
+  gender = $genders.sample
+  puts $parts_f.map { |part_f| part_f.(gender) }.join(" ")
+end
