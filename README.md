@@ -39,5 +39,3 @@ The example above loads all the data at once. You may “require” separate met
     
     puts realistic_russian_male_first_names.sample
       #=> Артём
-
-See “Files” section in the documentation.
