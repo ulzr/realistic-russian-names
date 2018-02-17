@@ -22,7 +22,7 @@ Example:
     puts russian_female_last_name(realistic_russian_male_last_names.sample)
       #=> Сидорова
 
-You may also use an executable:
+You may also use the executable:
 
     $ gen-realistic-russian-names -n 3
     Кирьяков Анатолий Алексеевич
