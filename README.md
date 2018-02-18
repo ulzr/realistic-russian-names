@@ -22,6 +22,10 @@ Example:
     puts russian_female_last_name(realistic_russian_male_last_names.sample)
       #=> Сидорова
 
+The more popular the name, the more often it is returned by `.sample`.
+
+See top level namespace for other methods.
+
 You may also use the executable:
 
     $ gen-realistic-russian-names -n 3
